@@ -1,0 +1,30 @@
+run:
+  modules-download-mode: vendor
+  skip-dirs:
+    - .build
+    - .github
+    - benchmarks
+    - bin
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - gosec
+    - maligned
+    - misspell
+    - prealloc
+    - stylecheck
+    - unparam
+  disable:
+    - deadcode
+    - unused
+    - varcheck
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/lukasmalkmus/horcrux
+  govet:
+    # check-shadowing: true

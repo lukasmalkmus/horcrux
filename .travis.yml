@@ -1,0 +1,41 @@
+language: go
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
+
+go:
+  - 1.x
+  - master
+
+matrix:
+  allow_failures:
+    - go: master
+  fast_finish: true
+
+stages:
+  - lint
+  - test
+  - build
+
+script: make $TEST_SUIT
+
+after_success: if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  include:
+    - stage: lint
+      env: TEST_SUIT=none
+      script: make lint
+      after_success: curl -d "repo=github.com/${TRAVIS_REPO_SLUG}" https://goreportcard.com/checks
+
+    - &build
+      stage: build
+      env: TARGET=darwin
+      script: make build GOOS=$TARGET
+      after_success: skip
+    - <<: *build
+      env: TARGET=linux
+    - <<: *build
+      env: TARGET=windows

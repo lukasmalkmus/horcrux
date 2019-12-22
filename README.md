@@ -9,6 +9,7 @@
 [![Latest Release][release_badge]][release]
 [![License][license_badge]][license]
 [![License Status][license_status_badge]][license_status]
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_shield)
 
 ---
 
@@ -110,3 +111,6 @@ See [LICENSE](LICENSE) for more information.
 [license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg
 [license_status_large]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_large
 [license_status_large_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg?type=large
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_large)

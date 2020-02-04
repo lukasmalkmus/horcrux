@@ -9,10 +9,6 @@ go:
   - 1.x
   - master
 
-env:
-  matrix:
-    - TEST_SUIT=test
-
 matrix:
   allow_failures:
     - go: master
@@ -23,14 +19,13 @@ stages:
   - test
   - build
 
-script: make $TEST_SUIT
+script: make test
 
 after_success: if [ -f coverage.out ]; then bash <(curl -s https://codecov.io/bash); fi
 
 jobs:
   include:
     - stage: lint
-      env: TEST_SUIT=none
       script: make lint
       after_success: curl -d "repo=github.com/${TRAVIS_REPO_SLUG}" https://goreportcard.com/checks
     - &build

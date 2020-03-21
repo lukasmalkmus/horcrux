@@ -64,7 +64,7 @@ func WithCustomChecks(checks string) Option {
 			return
 		}
 
-		for name, _ := range config.Checks {
+		for name := range config.Checks {
 			config.Checks[name] = false
 		}
 

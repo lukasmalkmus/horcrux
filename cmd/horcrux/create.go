@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/snappy"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -89,7 +90,7 @@ var createCmd = &cobra.Command{
 
 			prompt = promptui.Prompt{
 				Label:   "Your name",
-				Default: defaultUsernameIfNotTaken(),
+				Default: defaultUsername(),
 				Validate: func(input string) error {
 					if err := validateString(input); err != nil {
 						return err
@@ -166,10 +167,17 @@ func writeFragmentToDisk(fileName string, fragment horcrux.Fragment) error {
 	}
 	defer f.Close()
 
-	if err := gob.NewEncoder(f).Encode(fragment); err != nil {
+	w := snappy.NewBufferedWriter(f)
+	defer w.Close()
+
+	if err := gob.NewEncoder(w).Encode(fragment); err != nil {
 		return err
 	}
-	return nil
+
+	if err = w.Flush(); err != nil {
+		return err
+	}
+	return f.Sync()
 }
 
 func hasOwner(questions []Question, owner string) bool {
@@ -181,7 +189,7 @@ func hasOwner(questions []Question, owner string) bool {
 	return false
 }
 
-func defaultUsernameIfNotTaken() string {
+func defaultUsername() string {
 	var username string
 	u, err := user.Current()
 	if err == nil {

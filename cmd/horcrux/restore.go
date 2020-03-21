@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"os"
 
+	"github.com/golang/snappy"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
@@ -14,7 +15,7 @@ var outputFile string
 
 // restoreCmd represents the restore command.
 var restoreCmd = &cobra.Command{
-	Use:   "restore [files]",
+	Use:   "restore [files...]",
 	Short: "Restore a file from the given horcruxes",
 	Args:  cobra.MinimumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -75,8 +76,10 @@ func getFragementFromDisk(fileName string) (horcrux.Fragment, error) {
 	}
 	defer f.Close()
 
+	r := snappy.NewReader(f)
+
 	var fragment horcrux.Fragment
-	if err := gob.NewDecoder(f).Decode(&fragment); err != nil {
+	if err := gob.NewDecoder(r).Decode(&fragment); err != nil {
 		return horcrux.Fragment{}, err
 	}
 	return fragment, nil

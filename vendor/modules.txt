@@ -45,6 +45,8 @@ github.com/gobwas/glob/util/strings
 github.com/gofrs/flock
 # github.com/gogo/protobuf v1.2.1
 github.com/gogo/protobuf/proto
+# github.com/golang/snappy v0.0.1
+github.com/golang/snappy
 # github.com/golangci/check v0.0.0-20180506172741-cfe4005ccda2
 github.com/golangci/check/cmd/structcheck
 github.com/golangci/check/cmd/varcheck

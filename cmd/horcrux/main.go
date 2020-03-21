@@ -30,16 +30,11 @@ func main() {
 }
 
 func handlePromptError(err error) error {
-	if err == nil {
+	if err == nil || err == promptui.ErrAbort {
 		return nil
 	} else if cause := errors.Unwrap(err); cause != nil {
 		err = cause
 	}
-
-	if err == promptui.ErrAbort {
-		return errors.New("aborted by user")
-	}
-
 	return err
 }
 

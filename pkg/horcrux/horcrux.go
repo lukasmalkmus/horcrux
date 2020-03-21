@@ -46,7 +46,7 @@ type Fragment struct {
 // Answer is an encrypted fragment of the secret and the answer to the security
 // question.
 type Answer struct {
-	// Fragment is the previously-encrypted fragment.
+	// Fragment is the previously encrypted fragment.
 	Fragment
 	// Answer is the answer to the security question.
 	Answer string

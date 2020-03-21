@@ -88,7 +88,8 @@ dep-clean: ## Remove obsolete dependencies.
 .PHONY: dep-upgrade
 dep-upgrade: ## Upgrade all direct dependencies to their latest version.
 	@echo ">> upgrading dependencies"
-	@$(GO_NO_VENDOR) get $(shell $(GO) list -f '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}' -m all)
+	@$(GO) get $(shell $(GO_NO_VENDOR) list -f '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}' -m all)
+	@$(GO) mod vendor
 	@make dep
 
 .PHONY: dep

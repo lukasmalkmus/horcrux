@@ -422,4 +422,64 @@ After:
 		Title: `Use result of type assertion to simplify cases`,
 		Since: "2019.2",
 	},
+
+	"S1035": {
+		Title: `Redundant call to net/http.CanonicalHeaderKey in method call on net/http.Header`,
+		Text: `The methods on net/http.Header, namely Add, Del, Get and Set, already
+canonicalize the given header name.`,
+		Since: "2020.1",
+	},
+
+	"S1036": {
+		Title: `Unnecessary guard around map access`,
+
+		Text: `When accessing a map key that doesn't exist yet, one
+receives a zero value. Often, the zero value is a suitable value, for example when using append or doing integer math.
+
+The following
+
+    if _, ok := m["foo"]; ok {
+        m["foo"] = append(m["foo"], "bar")
+    } else {
+        m["foo"] = []string{"bar"}
+    }
+
+can be simplified to
+
+    m["foo"] = append(m["foo"], "bar")
+
+and
+
+    if _, ok := m2["k"]; ok {
+        m2["k"] += 4
+    } else {
+        m2["k"] = 4
+    }
+
+can be simplified to
+
+    m["k"] += 4
+`,
+		Since: "2020.1",
+	},
+
+	"S1037": {
+		Title: `Elaborate way of sleeping`,
+		Text: `Using a select statement with a single case receiving
+from the result of time.After is a very elaborate way of sleeping that
+can much simpler be expressed with a simple call to time.Sleep.`,
+		Since: "2020.1",
+	},
+
+	"S1038": {
+		Title: "Unnecessarily complex way of printing formatted string",
+		Text:  `Instead of using fmt.Print(fmt.Sprintf(...)), one can use fmt.Printf(...).`,
+		Since: "2020.1",
+	},
+
+	"S1039": {
+		Title: "Unnecessary use of fmt.Sprint",
+		Text:  `Calling fmt.Sprint with a single string argument is unnecessary and identical to using the string directly.`,
+		Since: "2020.1",
+	},
 }

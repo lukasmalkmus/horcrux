@@ -4,12 +4,15 @@
 
 ## Install
 
-Download a binary from [releases](https://github.com/gotestyourself/gotestsum/releases), or get the
-source with `go get gotest.tools/gotestsum` (you may need to run `dep ensure`).
+Download a binary from [releases](https://github.com/gotestyourself/gotestsum/releases), or from
+source with `go get gotest.tools/gotestsum` (you may need to run `dep ensure` if your version of Go
+does not support modules).
 
 ## Demo
+A demonstration of three `--format` options.
 
-![Demo](https://raw.githubusercontent.com/gotestyourself/gotestsum/master/docs/demo.gif)
+![Demo](https://i.ibb.co/XZfhmXq/demo.gif)
+<br />[Source](https://github.com/gotestyourself/gotestsum/tree/readme-demo/scripts)
 
 ## Docs
 
@@ -26,7 +29,8 @@ output.
 - [Summary](#summary)
 - [JUnit XML](#junit-xml)
 - [JSON file](#json-file-output)
-- [Setting go test flags and using custom commands](#custom-go-test-command)
+- [Using go test flags and custom commands](#custom-go-test-command)
+- [Executing a compiled test binary](#executing-a-compiled-test-binary)
 
 ### Format
 
@@ -38,9 +42,9 @@ gotestsum --format short-verbose
 
 Supported formats:
  * `dots` - print a character for each test.
- * `short` (default) - print a line for each package.
- * `short-with-failures` - print a line for each package and failed test output.
- * `short-verbose` - print a line for each test and package.
+ * `pkgname` (default) - print a line for each package.
+ * `pkgname-and-test-fails` - print a line for each package, and failed test output.
+ * `testname` - print a line for each test and package.
  * `standard-quiet` - the standard `go test` format.
  * `standard-verbose` - the standard `go test -v` format.
 
@@ -98,6 +102,10 @@ accept the following values:
 * `full` - the full package path (default)
 
 
+Note: If Go is not installed, or the `go` binary is not in `PATH`, the `GOVERSION`
+environment variable can be set to remove the "failed to lookup go version for junit xml"
+warning.
+
 ### JSON file output
 
 When the `--jsonfile` flag or `GOTESTSUM_JSONFILE` environment variable are set
@@ -149,6 +157,29 @@ Example: using `TEST_DIRECTORY`
 ```
 TEST_DIRECTORY=./io/http gotestsum
 ```
+
+### Executing a compiled test binary
+
+`gotestsum` supports executing a compiled test binary (created with `go test -c`) by running
+it as a custom command.
+
+The `-json` flag is handled by `go test` itself, it is not available when using a
+compiled test binary, so `go tool test2json` must be used to get the output
+that `gotestsum` expects.
+
+Example:
+
+```
+gotestsum --raw-command -- go tool test2json -p pkgname ./binary.test -test.v
+```
+
+`pkgname` is the name of the package being tested, it will show up in the test
+output. `./binary.test` is the path to the compiled test binary. The `-test.v`
+must be included so that `go tool test2json` receives all the output.
+
+To execute a test binary without installing Go, see
+[running without go](./docs/running-without-go.md).
+
 
 ### Run tests when a file is modified
 

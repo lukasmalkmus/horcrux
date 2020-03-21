@@ -65,12 +65,12 @@ Flags:
 		flags.PrintDefaults()
 		fmt.Fprint(os.Stderr, `
 Formats:
-    dots                print a character for each test
-    short               print a line for each package
-    short-with-failures print a line for each package and failed test output
-    short-verbose       print a line for each test and package
-    standard-quiet      standard go test format
-    standard-verbose    standard go test -v format
+    dots                    print a character for each test
+    pkgname                 print a line for each package
+    pkgname-and-test-fails  print a line for each package and failed test output
+    testname                print a line for each test and package
+    standard-quiet          standard go test format
+    standard-verbose        standard go test -v format
 `)
 	}
 	flags.BoolVar(&opts.debug, "debug", false, "enabled debug")
@@ -85,7 +85,7 @@ Formats:
 	flags.StringVar(&opts.junitFile, "junitfile",
 		lookEnvWithDefault("GOTESTSUM_JUNITFILE", ""),
 		"write a JUnit XML file")
-	flags.BoolVar(&opts.noColor, "no-color", false, "disable color output")
+	flags.BoolVar(&opts.noColor, "no-color", color.NoColor, "disable color output")
 	flags.Var(opts.noSummary, "no-summary",
 		"do not print summary of: "+testjson.SummarizeAll.String())
 	flags.Var(opts.junitTestSuiteNameFormat, "junitfile-testsuite-name",
@@ -149,9 +149,7 @@ func run(opts *options) error {
 	if err != nil {
 		return err
 	}
-	if err := testjson.PrintSummary(out, exec, opts.noSummary.value); err != nil {
-		return err
-	}
+	testjson.PrintSummary(out, exec, opts.noSummary.value)
 	if err := writeJUnitFile(opts, exec); err != nil {
 		return err
 	}

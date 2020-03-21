@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/golang/snappy v0.0.1
 	github.com/golangci/golangci-lint v1.24.0
+	github.com/google/uuid v1.0.0
 	github.com/manifoldco/promptui v0.7.0
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2

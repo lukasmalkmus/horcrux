@@ -11,10 +11,10 @@ import (
 func Example() {
 	secret := []byte("my favorite password")
 	questions := []horcrux.Question{
-		{"What's your first pet's name?", "Spot"},
-		{"What's your least favorite food?", "Broccoli"},
-		{"What's your mother's maiden name?", "Hernandez"},
-		{"What's your real name?", "Rumplestiltskin"},
+		{"Tim", "What's your first pet's name?", "Spot"},
+		{"Jay", "What's your least favorite food?", "Broccoli"},
+		{"Tom", "What's your mother's maiden name?", "Hernandez"},
+		{"Joe", "What's your real name?", "Rumplestiltskin"},
 	}
 
 	// Split into four fragments, any two of which can be combined to recover
@@ -49,10 +49,10 @@ func Example() {
 var (
 	secret    = []byte("my favorite password")
 	questions = []horcrux.Question{
-		{"What's your first pet's name?", "Spot"},
-		{"What's your least favorite food?", "Broccoli"},
-		{"What's your mother's maiden name?", "Hernandez"},
-		{"What's your real name?", "Rumplestiltskin"},
+		{"Tim", "What's your first pet's name?", "Spot"},
+		{"Jay", "What's your least favorite food?", "Broccoli"},
+		{"Tom", "What's your mother's maiden name?", "Hernandez"},
+		{"Joe", "What's your real name?", "Rumplestiltskin"},
 	}
 )
 

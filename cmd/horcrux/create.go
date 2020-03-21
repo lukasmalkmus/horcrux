@@ -1,16 +1,13 @@
 package main
 
 import (
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"os/user"
 	"strconv"
 	"strings"
 
-	"github.com/golang/snappy"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,26 +15,7 @@ import (
 	"github.com/lukasmalkmus/horcrux/pkg/horcrux"
 )
 
-// Question extends horcrux.Question.
-type Question struct {
-	horcrux.Question
-
-	Owner string
-}
-
-// Questions are multiple questions.
-type Questions []Question
-
-// HorcruxQuestions returns a slice of *horcrux.Question.
-func (q Questions) HorcruxQuestions() []horcrux.Question {
-	questions := make([]horcrux.Question, len(q))
-	for k, question := range q {
-		questions[k] = question.Question
-	}
-	return questions
-}
-
-var questions Questions
+var questions []horcrux.Question
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
@@ -65,7 +43,7 @@ var createCmd = &cobra.Command{
 
 		var threshold int
 		prompt = promptui.Prompt{
-			Label: "Amount of horcruxes needed to restore the file",
+			Label: "Amount of horcruxes needed to restore the content",
 			Validate: func(input string) error {
 				if v, err := strconv.Atoi(input); err != nil {
 					return errors.New("invalid number")
@@ -84,7 +62,7 @@ var createCmd = &cobra.Command{
 		threshold, _ = strconv.Atoi(res)
 		viper.Set("threshold", threshold)
 
-		questions = make([]Question, lenHorcruxes)
+		questions = make([]horcrux.Question, lenHorcruxes)
 		for k := range questions {
 			cmd.Printf("Creating horcrux %d of %d. Please enter some information to protect your horcrux:\n", k+1, lenHorcruxes)
 
@@ -108,7 +86,7 @@ var createCmd = &cobra.Command{
 				Label:    "Your security question",
 				Validate: validateString,
 			}
-			if questions[k].Question.Question, err = prompt.Run(); err != nil {
+			if questions[k].Question, err = prompt.Run(); err != nil {
 				return handlePromptError(err)
 			}
 
@@ -137,7 +115,7 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
-		fragments, err := horcrux.Split(secret, questions.HorcruxQuestions(), viper.GetInt("threshold"))
+		fragments, err := horcrux.Split(secret, questions, viper.GetInt("threshold"))
 		if err != nil {
 			return err
 		}
@@ -160,27 +138,7 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 }
 
-func writeFragmentToDisk(fileName string, fragment horcrux.Fragment) error {
-	f, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	w := snappy.NewBufferedWriter(f)
-	defer w.Close()
-
-	if err := gob.NewEncoder(w).Encode(fragment); err != nil {
-		return err
-	}
-
-	if err = w.Flush(); err != nil {
-		return err
-	}
-	return f.Sync()
-}
-
-func hasOwner(questions []Question, owner string) bool {
+func hasOwner(questions []horcrux.Question, owner string) bool {
 	for _, question := range questions {
 		if question.Owner == owner {
 			return true

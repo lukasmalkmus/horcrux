@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/scrypt"
 
@@ -21,6 +22,8 @@ const (
 // Question is a securtiy question composed of the actual question and the
 // answer.
 type Question struct {
+	// Owner of the question.
+	Owner string
 	// Question is the actual question.
 	Question string
 	// Answer is the answer to that question.
@@ -30,11 +33,15 @@ type Question struct {
 // Fragment is an encrypted fragment of the secret associated with a security
 // question.
 type Fragment struct {
+	// ID of the fragment. Every fragment from the same split has the same ID.
+	ID string
+	// Owner of the fragment.
+	Owner string
+	// Question is the security question.
+	Question string
 	// Threshold is the number of fragments required to recover the secret.
 	// Must be between 2 and 255.
 	Threshold int
-	// Question is the security question.
-	Question string
 	// Nonce is the random nonce used for encryption.
 	Nonce []byte
 	// Salt is the random salt used for scrypt.
@@ -56,6 +63,11 @@ type Answer struct {
 // given. The threshold specifies how many fragments are needed to recover the
 // secret and ranges from 2 to 255.
 func Split(secret []byte, questions []Question, threshold int) ([]Fragment, error) {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+
 	shares, err := shamir.Split(secret, len(questions), threshold)
 	if err != nil {
 		return nil, err
@@ -67,8 +79,10 @@ func Split(secret []byte, questions []Question, threshold int) ([]Fragment, erro
 	)
 	for _, question := range questions {
 		fragment := Fragment{
-			Threshold: threshold,
+			ID:        id.String(),
+			Owner:     question.Owner,
 			Question:  question.Question,
+			Threshold: threshold,
 		}
 
 		fragment.Salt = make([]byte, saltLen)

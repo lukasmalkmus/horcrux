@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/gob"
+	"fmt"
 	"os"
 
-	"github.com/golang/snappy"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
@@ -19,6 +18,7 @@ var restoreCmd = &cobra.Command{
 	Short: "Restore a file from the given horcruxes",
 	Args:  cobra.MinimumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var splitID string
 		answers := make([]horcrux.Answer, len(args))
 		for k, arg := range args {
 			fragment, err := getFragementFromDisk(arg)
@@ -26,11 +26,17 @@ var restoreCmd = &cobra.Command{
 				return err
 			}
 			answers[k] = horcrux.Answer{Fragment: fragment}
+
+			if splitID == "" {
+				splitID = fragment.ID
+			} else if splitID != fragment.ID {
+				return fmt.Errorf("fragments are not part of the same split")
+			}
 		}
 
 		for k, answer := range answers {
 			prompt := promptui.Prompt{
-				Label:    answer.Question,
+				Label:    fmt.Sprintf("(%s) %s", answer.Owner, answer.Question),
 				Validate: validateString,
 			}
 			res, err := prompt.Run()
@@ -67,20 +73,4 @@ var restoreCmd = &cobra.Command{
 func init() {
 	restoreCmd.Flags().StringVarP(&outputFile, "output", "o", "", "file to write restored content to")
 	rootCmd.AddCommand(restoreCmd)
-}
-
-func getFragementFromDisk(fileName string) (horcrux.Fragment, error) {
-	f, err := os.Open(fileName)
-	if err != nil {
-		return horcrux.Fragment{}, err
-	}
-	defer f.Close()
-
-	r := snappy.NewReader(f)
-
-	var fragment horcrux.Fragment
-	if err := gob.NewDecoder(r).Decode(&fragment); err != nil {
-		return horcrux.Fragment{}, err
-	}
-	return fragment, nil
 }

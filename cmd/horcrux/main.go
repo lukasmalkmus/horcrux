@@ -1,13 +1,16 @@
 package main
 
 import (
+	"encoding/gob"
 	"errors"
 	"os"
 	"strings"
 
+	"github.com/golang/snappy"
 	"github.com/manifoldco/promptui"
-
 	"github.com/spf13/cobra"
+
+	"github.com/lukasmalkmus/horcrux/pkg/horcrux"
 )
 
 // rootCmd represents the base command when called without any subcommands.
@@ -43,4 +46,40 @@ func validateString(input string) error {
 		return errors.New("cannot be empty")
 	}
 	return nil
+}
+
+func writeFragmentToDisk(fileName string, fragment horcrux.Fragment) error {
+	f, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	w := snappy.NewBufferedWriter(f)
+	defer w.Close()
+
+	if err := gob.NewEncoder(w).Encode(fragment); err != nil {
+		return err
+	}
+
+	if err = w.Flush(); err != nil {
+		return err
+	}
+	return f.Sync()
+}
+
+func getFragementFromDisk(fileName string) (horcrux.Fragment, error) {
+	f, err := os.Open(fileName)
+	if err != nil {
+		return horcrux.Fragment{}, err
+	}
+	defer f.Close()
+
+	r := snappy.NewReader(f)
+
+	var fragment horcrux.Fragment
+	if err := gob.NewDecoder(r).Decode(&fragment); err != nil {
+		return horcrux.Fragment{}, err
+	}
+	return fragment, nil
 }

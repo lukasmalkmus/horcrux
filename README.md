@@ -21,11 +21,11 @@
 
 ## Introduction
 
-*horcrux* is a security question based secret sharing utility. The idea and
+_horcrux_ is a security question based secret sharing utility. The idea and
 package code is inspired and mostly taken from the abandoned [horcrux] package
 by [Coda Hale].
 
-*horcrux* splits a secret into multiple fragments and associates every fragment
+_horcrux_ splits a secret into multiple fragments and associates every fragment
 with a security question. The answer to that question is used to encrypt the
 fragment using ChaCha20Poly1305. Only a given number of fragments is needed to
 fully restore the original secret.
@@ -34,7 +34,7 @@ fully restore the original secret.
 
 ### Installation
 
-The easiest way to run *horcrux* is by grabbing the latest standalone binary
+The easiest way to run _horcrux_ is by grabbing the latest standalone binary
 from the [release page][release].
 
 This project uses native [go mod] support for vendoring and requires a working
@@ -101,9 +101,9 @@ Split1GB-8     1.07G ± 0%
 Splitting a 1 GB file takes up to 3 minutes. Also the memory consumption is a
 bit higher than the size of the file which is being processed. An `io.Reader`
 based implementation is needed to fix this but this requires multiple tweaks,
-especially Shamir's Secret Sharing implementation.
+especially to Shamir's Secret Sharing implementation.
 
-Splitting 
+Splitting
 
 ## Contributing
 
@@ -111,7 +111,7 @@ Feel free to submit PRs or to fill Issues. Every kind of help is appreciated.
 
 ## License
 
-© Lukas Malkmus, 2019
+© Lukas Malkmus, 2020
 
 Distributed under MIT License (`The MIT License`).
 
@@ -120,13 +120,14 @@ See [LICENSE](LICENSE) for more information.
 [![License Status Large][license_status_large_badge]][license_status_large]
 
 <!-- Links -->
-[Lukas Malkmus]: https://github.com/lukasmalkmus
-[Coda Hale]: https://github.com/codahale
+
+[lukas malkmus]: https://github.com/lukasmalkmus
+[coda hale]: https://github.com/codahale
 [horcrux]: https://github.com/codahale/horcrux
 [go mod]: https://golang.org/cmd/go/#hdr-Module_maintenance
 
-
 <!-- Badges -->
+
 [build]: https://travis-ci.com/lukasmalkmus/horcrux
 [build_badge]: https://img.shields.io/travis/com/lukasmalkmus/horcrux.svg?style=flat-square
 [coverage]: https://codecov.io/gh/lukasmalkmus/horcrux

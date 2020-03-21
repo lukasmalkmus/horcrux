@@ -96,19 +96,51 @@ func TestRecoverBadAnswers(t *testing.T) {
 	equals(t, actual, expected)
 }
 
-func benchmarkSplit(b *testing.B, size int) {
+func BenchmarkSplit64KBThreshold2(b *testing.B) { benchmarkSplit(b, 1024*64, 2) }
+func BenchmarkSplit1MBThreshold2(b *testing.B)  { benchmarkSplit(b, 1024*1024, 2) }
+func BenchmarkSplit64KBThreshold3(b *testing.B) { benchmarkSplit(b, 1024*64, 3) }
+func BenchmarkSplit1MBThreshold3(b *testing.B)  { benchmarkSplit(b, 1024*1024, 3) }
+func BenchmarkSplit64KBThreshold4(b *testing.B) { benchmarkSplit(b, 1024*64, 4) }
+func BenchmarkSplit1MBThreshold4(b *testing.B)  { benchmarkSplit(b, 1024*1024, 4) }
+
+func benchmarkSplit(b *testing.B, size, threshold int) {
 	secret := make([]byte, size)
 	b.ResetTimer()
+	var err error
 	for n := 0; n < b.N; n++ {
-		_, err := horcrux.Split(secret, questions, 2)
-		ok(b, err)
+		_, err = horcrux.Split(secret, questions, threshold)
 	}
+	ok(b, err)
 }
 
-func BenchmarkSplit64KB(b *testing.B)  { benchmarkSplit(b, 1024*64) }
-func BenchmarkSplit1MB(b *testing.B)   { benchmarkSplit(b, 1024*1024) }
-func BenchmarkSplit128MB(b *testing.B) { benchmarkSplit(b, 1024*1024*128) }
-func BenchmarkSplit1GB(b *testing.B)   { benchmarkSplit(b, 1024*1024*1024) }
+func BenchmarkRecover64KBUse2Fragments(b *testing.B) { benchmarkRecover(b, 1024*64, 2) }
+func BenchmarkRecover1MBUse2Fragments(b *testing.B)  { benchmarkRecover(b, 1024*1024, 2) }
+func BenchmarkRecover64KBUse3Fragments(b *testing.B) { benchmarkRecover(b, 1024*64, 3) }
+func BenchmarkRecover1MBUse3Fragments(b *testing.B)  { benchmarkRecover(b, 1024*1024, 3) }
+func BenchmarkRecover64KBUse4Fragments(b *testing.B) { benchmarkRecover(b, 1024*64, 4) }
+func BenchmarkRecover1MBUse4Fragments(b *testing.B)  { benchmarkRecover(b, 1024*1024, 4) }
+
+func benchmarkRecover(b *testing.B, size, fragmentsToUse int) {
+	secret := make([]byte, size)
+	fragments, err := horcrux.Split(secret, questions, 2)
+	ok(b, err)
+
+	answers := make([]horcrux.Answer, fragmentsToUse)
+	for i := range answers {
+		answers[i] = horcrux.Answer{
+			Fragment: fragments[i],
+			Answer:   questions[i].Answer,
+		}
+	}
+
+	b.ResetTimer()
+	var recoveredSecret []byte
+	for n := 0; n < b.N; n++ {
+		recoveredSecret, err = horcrux.Recover(answers)
+	}
+	ok(b, err)
+	equals(b, recoveredSecret, secret)
+}
 
 // assert fails the test if the condition is false.
 func assert(tb testing.TB, condition bool, msg string, v ...interface{}) {

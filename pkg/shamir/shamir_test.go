@@ -159,9 +159,13 @@ func TestInterpolate_Rand(t *testing.T) {
 		}
 	}
 }
+func BenchmarkSplit1MB5Parts5Threshold(b *testing.B) { benchmarkSplit1MB(b, 5, 5) }
+func BenchmarkSplit1MB5Parts4Threshold(b *testing.B) { benchmarkSplit1MB(b, 5, 4) }
+func BenchmarkSplit1MB5Parts3Threshold(b *testing.B) { benchmarkSplit1MB(b, 5, 3) }
+func BenchmarkSplit1MB5Parts2Threshold(b *testing.B) { benchmarkSplit1MB(b, 5, 2) }
 
-func BenchmarkSplit(b *testing.B) {
-	secret := make([]byte, 1024*1024*1024)
+func benchmarkSplit1MB(b *testing.B, parts, threshold int) {
+	secret := make([]byte, 1024*1024)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		_, err := Split(secret, 5, 3)

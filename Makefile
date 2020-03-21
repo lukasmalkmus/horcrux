@@ -56,15 +56,19 @@ go-pkg-sourcefiles = $(shell $(call go-list-pkg-sources,$(strip $1)))
 all: dep fmt lint test build ## Run dep, fmt, lint, test and build.
 
 .PHONY: bench
-bench: $(BENCHSTAT) ## Run all benchmarks and compares the benchmark results of a dirty workspace to the ones of a clean workspace if present.
-	@echo ">> running benchmarks"
-	@mkdir -p benchmarks
+bench: $(BENCHSTAT) ## Run all benchmarks and compare the benchmark results of a dirty workspace to the ones of a clean workspace if available.
+        @echo ">> running benchmarks"
+        @mkdir -p benchmarks
 ifneq ($(DIRTY),untracked)
-	@$(GO) test $(GO_BENCH_FLAGS) ./... > benchmarks/$(REVISION).txt
-	@$(BENCHSTAT) benchmarks/$(REVISION).txt
+        @$(GO) test $(GO_BENCH_FLAGS) ./... > benchmarks/$(REVISION).txt
+        @$(BENCHSTAT) benchmarks/$(REVISION).txt
 else
-	@$(GO) test $(GO_BENCH_FLAGS) ./... > benchmarks/$(REVISION)-dirty.txt
-	@$(BENCHSTAT) benchmarks/$(REVISION).txt benchmarks/$(REVISION)-dirty.txt
+        @$(GO) test $(GO_BENCH_FLAGS) ./... > benchmarks/$(REVISION)-dirty.txt
+ifneq (,$(wildcard benchmarks/$(REVISION).txt))
+        @$(BENCHSTAT) benchmarks/$(REVISION).txt benchmarks/$(REVISION)-dirty.txt
+else
+        @$(BENCHSTAT) benchmarks/$(REVISION)-dirty.txt
+endif
 endif
 
 .PHONY: build

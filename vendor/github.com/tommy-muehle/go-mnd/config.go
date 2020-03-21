@@ -43,7 +43,7 @@ func WithCustomChecks(checks string) Option {
 			return
 		}
 
-		for name, _ := range knownChecks {
+		for name := range knownChecks {
 			config.Checks[name] = false
 		}
 

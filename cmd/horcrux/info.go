@@ -14,19 +14,19 @@ Question: {{ .Question }}
 // infoCmd represents the info command.
 var infoCmd = &cobra.Command{
 	Use:   "info [file]",
-	Short: "Get info of a fragment",
+	Short: "Get info of a horcrux",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fragment, err := getFragementFromDisk(args[0])
+		horcrux, err := getFragementFromDisk(args[0])
 		if err != nil {
 			return err
 		}
 
-		tmpl, err := template.New("fragment").Parse(templateStr)
+		tmpl, err := template.New("horcrux").Parse(templateStr)
 		if err != nil {
 			return err
 		}
-		return tmpl.Execute(cmd.OutOrStdout(), fragment)
+		return tmpl.Execute(cmd.OutOrStdout(), horcrux)
 	},
 }
 

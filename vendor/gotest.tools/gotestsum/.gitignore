@@ -1,5 +1,5 @@
 vendor/
 .dobi/
-.depsources
 dist/
 junit.xml
+.plsdo/

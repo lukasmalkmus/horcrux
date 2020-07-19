@@ -11,8 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"gotest.tools/gotestsum/log"
 	"gotest.tools/gotestsum/testjson"
 )
 
@@ -73,7 +72,10 @@ type FormatFunc func(string) string
 
 // Write creates an XML document and writes it to out.
 func Write(out io.Writer, exec *testjson.Execution, cfg Config) error {
-	return errors.Wrap(write(out, generate(exec, cfg)), "failed to write JUnit XML")
+	if err := write(out, generate(exec, cfg)); err != nil {
+		return fmt.Errorf("failed to write JUnit XML: %v", err)
+	}
+	return nil
 }
 
 func generate(exec *testjson.Execution, cfg Config) JUnitTestSuites {
@@ -129,11 +131,11 @@ func goVersion() string {
 	if version, ok := os.LookupEnv("GOVERSION"); ok {
 		return version
 	}
-	logrus.Debugf("exec: go version")
+	log.Debugf("exec: go version")
 	cmd := exec.Command("go", "version")
 	out, err := cmd.Output()
 	if err != nil {
-		logrus.WithError(err).Warn("failed to lookup go version for junit xml")
+		log.Warnf("Failed to lookup go version for junit xml: %v", err)
 		return "unknown"
 	}
 	return strings.TrimPrefix(strings.TrimSpace(string(out)), "go version ")
@@ -146,7 +148,7 @@ func packageTestCases(pkg *testjson.Package, formatClassname FormatFunc) []JUnit
 		jtc := newJUnitTestCase(testjson.TestCase{Test: "TestMain"}, formatClassname)
 		jtc.Failure = &JUnitFailure{
 			Message:  "Failed",
-			Contents: pkg.Output(""),
+			Contents: pkg.Output(0),
 		}
 		cases = append(cases, jtc)
 	}
@@ -155,14 +157,16 @@ func packageTestCases(pkg *testjson.Package, formatClassname FormatFunc) []JUnit
 		jtc := newJUnitTestCase(tc, formatClassname)
 		jtc.Failure = &JUnitFailure{
 			Message:  "Failed",
-			Contents: pkg.Output(tc.Test),
+			Contents: strings.Join(pkg.OutputLines(tc), ""),
 		}
 		cases = append(cases, jtc)
 	}
 
 	for _, tc := range pkg.Skipped {
 		jtc := newJUnitTestCase(tc, formatClassname)
-		jtc.SkipMessage = &JUnitSkipMessage{Message: pkg.Output(tc.Test)}
+		jtc.SkipMessage = &JUnitSkipMessage{
+			Message: strings.Join(pkg.OutputLines(tc), ""),
+		}
 		cases = append(cases, jtc)
 	}
 

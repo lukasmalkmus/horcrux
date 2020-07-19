@@ -5,7 +5,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
 	"gotest.tools/gotestsum/internal/junitxml"
 	"gotest.tools/gotestsum/testjson"
 )
@@ -83,4 +85,50 @@ func (f *junitFieldFormatValue) Value() junitxml.FormatFunc {
 		return nil
 	}
 	return f.value
+}
+
+type commandValue struct {
+	original string
+	command  []string
+}
+
+func (c *commandValue) String() string {
+	return c.original
+}
+
+func (c *commandValue) Set(raw string) error {
+	var err error
+	c.command, err = shlex.Split(raw)
+	c.original = raw
+	return err
+}
+
+func (c *commandValue) Type() string {
+	return "command"
+}
+
+func (c *commandValue) Value() []string {
+	if c == nil {
+		return nil
+	}
+	return c.command
+}
+
+var _ pflag.Value = (*stringSlice)(nil)
+
+// stringSlice is a flag.Value which populates the string slice by splitting
+// the raw flag value on whitespace.
+type stringSlice []string
+
+func (s *stringSlice) String() string {
+	return strings.Join(*s, " ")
+}
+
+func (s *stringSlice) Set(raw string) error {
+	*s = append(*s, strings.Fields(raw)...)
+	return nil
+}
+
+func (s *stringSlice) Type() string {
+	return "list"
 }

@@ -9,13 +9,12 @@ import (
 	"syscall"
 	"unsafe"
 
-	isatty "github.com/mattn/go-isatty"
+	"golang.org/x/sys/windows"
 )
 
 var kernel32 = syscall.NewLazyDLL("kernel32.dll")
 
 var (
-	procGetConsoleScreenBufferInfo = kernel32.NewProc("GetConsoleScreenBufferInfo")
 	procSetConsoleCursorPosition   = kernel32.NewProc("SetConsoleCursorPosition")
 	procFillConsoleOutputCharacter = kernel32.NewProc("FillConsoleOutputCharacterW")
 )
@@ -23,28 +22,11 @@ var (
 // clear the line and move the cursor up
 var clear = fmt.Sprintf("%c[%dA%c[2K\r", ESC, 0, ESC)
 
-type short int16
 type dword uint32
-type word uint16
 
 type coord struct {
-	x short
-	y short
-}
-
-type smallRect struct {
-	left   short
-	top    short
-	right  short
-	bottom short
-}
-
-type consoleScreenBufferInfo struct {
-	size              coord
-	cursorPosition    coord
-	attributes        word
-	window            smallRect
-	maximumWindowSize coord
+	x int16
+	y int16
 }
 
 type fdWriter interface {
@@ -52,30 +34,39 @@ type fdWriter interface {
 	Fd() uintptr
 }
 
-func (w *Writer) clearLines() {
+func (w *Writer) clearLines(count int) {
 	f, ok := w.out.(fdWriter)
-	if ok && !isatty.IsTerminal(f.Fd()) {
+	if ok && !isConsole(f.Fd()) {
 		ok = false
 	}
 	if !ok {
-		_, _ = fmt.Fprint(w.out, strings.Repeat(clear, w.lineCount))
+		_, _ = fmt.Fprint(w.out, strings.Repeat(clear, count))
 		return
 	}
 	fd := f.Fd()
-	var csbi consoleScreenBufferInfo
-	_, _, _ = procGetConsoleScreenBufferInfo.Call(fd, uintptr(unsafe.Pointer(&csbi)))
 
-	for i := 0; i < w.lineCount; i++ {
+	var csbi windows.ConsoleScreenBufferInfo
+	if err := windows.GetConsoleScreenBufferInfo(windows.Handle(fd), &csbi); err != nil {
+		return
+	}
+
+	for i := 0; i < count; i++ {
 		// move the cursor up
-		csbi.cursorPosition.y--
-		_, _, _ = procSetConsoleCursorPosition.Call(fd, uintptr(*(*int32)(unsafe.Pointer(&csbi.cursorPosition))))
+		csbi.CursorPosition.Y--
+		_, _, _ = procSetConsoleCursorPosition.Call(fd, uintptr(*(*int32)(unsafe.Pointer(&csbi.CursorPosition))))
 		// clear the line
 		cursor := coord{
-			x: csbi.window.left,
-			y: csbi.window.top + csbi.cursorPosition.y,
+			x: csbi.Window.Left,
+			y: csbi.Window.Top + csbi.CursorPosition.Y,
 		}
 		var count, w dword
-		count = dword(csbi.size.x)
+		count = dword(csbi.Size.X)
 		_, _, _ = procFillConsoleOutputCharacter.Call(fd, uintptr(' '), uintptr(count), *(*uintptr)(unsafe.Pointer(&cursor)), uintptr(unsafe.Pointer(&w)))
 	}
+}
+
+func isConsole(fd uintptr) bool {
+	var mode uint32
+	err := windows.GetConsoleMode(windows.Handle(fd), &mode)
+	return err == nil
 }

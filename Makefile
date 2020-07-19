@@ -27,12 +27,12 @@ COVERPROFILE	:= coverage.out
 DIRTY			:= $(shell git diff-index --quiet HEAD || echo "untracked")
 
 # FLAGS
-GOFLAGS			:= -buildmode=exe -tags=netgo -installsuffix=cgo -trimpath \
-					-ldflags='-s -w -extldflags "-static" \
-					-X $(MOD_NAME)/pkg/version.release=$(RELEASE) \
-					-X $(MOD_NAME)/pkg/version.revision=$(REVISION) \
-					-X $(MOD_NAME)/pkg/version.buildDate=$(BUILD_DATE) \
-					-X $(MOD_NAME)/pkg/version.buildUser=$(USER)'
+GOFLAGS	:= -buildmode=exe -tags=netgo -installsuffix=cgo -trimpath \
+			-ldflags='-s -w -extldflags "-static" \
+			-X $(MOD_NAME)/pkg/version.release=$(RELEASE) \
+			-X $(MOD_NAME)/pkg/version.revision=$(REVISION) \
+			-X $(MOD_NAME)/pkg/version.buildDate=$(BUILD_DATE) \
+			-X $(MOD_NAME)/pkg/version.buildUser=$(USER)'
 
 GOTESTSUM_FLAGS	:= --jsonfile tests.json --junitfile junit.xml
 GO_TEST_FLAGS 	:= -race -coverprofile=$(COVERPROFILE)

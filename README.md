@@ -99,7 +99,7 @@ Split1GB-8     1.07G ± 0%
 ```
 
 Splitting a 1 GB file takes up to 3 minutes. Also the memory consumption is a
-bit higher than the size of the file which is being processed. An `io.Reader`
+lot higher than the size of the file which is being processed. An `io.Reader`
 based implementation is needed to fix this but this requires multiple tweaks,
 especially to Shamir's Secret Sharing implementation.
 

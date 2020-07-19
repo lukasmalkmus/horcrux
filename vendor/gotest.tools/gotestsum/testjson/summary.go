@@ -66,7 +66,7 @@ func NewSummary(value string) (Summary, bool) {
 }
 
 // PrintSummary of a test Execution. Prints a section for each summary type
-// followed by a DONE line.
+// followed by a DONE line to out.
 func PrintSummary(out io.Writer, execution *Execution, opts Summary) {
 	execSummary := newExecSummary(execution, opts)
 	if opts.Includes(SummarizeSkipped) {
@@ -82,7 +82,7 @@ func PrintSummary(out io.Writer, execution *Execution, opts Summary) {
 	}
 
 	fmt.Fprintf(out, "\n%s %d tests%s%s%s in %s\n",
-		formatExecStatus(execution.done),
+		formatExecStatus(execution),
 		execution.Total(),
 		formatTestCount(len(execution.Skipped()), "skipped", ""),
 		formatTestCount(len(execution.Failed()), "failure", "s"),
@@ -101,16 +101,22 @@ func formatTestCount(count int, category string, pluralize string) string {
 	return fmt.Sprintf(", %d %s", count, category)
 }
 
-// TODO: maybe color this?
-func formatExecStatus(done bool) string {
-	if done {
-		return "DONE"
+func formatExecStatus(exec *Execution) string {
+	if !exec.done {
+		return ""
 	}
-	return ""
+	var runs string
+	if exec.lastRunID > 0 {
+		runs = fmt.Sprintf(" %d runs,", exec.lastRunID+1)
+	}
+	return "DONE" + runs
 }
 
 // FormatDurationAsSeconds formats a time.Duration as a float with an s suffix.
 func FormatDurationAsSeconds(d time.Duration, precision int) string {
+	if d == neverFinished {
+		return "unknown"
+	}
 	return fmt.Sprintf("%.[2]*[1]fs", d.Seconds(), precision)
 }
 
@@ -140,14 +146,14 @@ func countErrors(errors []string) int {
 type executionSummary interface {
 	Failed() []TestCase
 	Skipped() []TestCase
-	OutputLines(pkg, test string) []string
+	OutputLines(TestCase) []string
 }
 
 type noOutputSummary struct {
 	Execution
 }
 
-func (s *noOutputSummary) OutputLines(_, _ string) []string {
+func (s *noOutputSummary) OutputLines(_ TestCase) []string {
 	return nil
 }
 
@@ -165,13 +171,14 @@ func writeTestCaseSummary(out io.Writer, execution executionSummary, conf testCa
 	}
 	fmt.Fprintln(out, "\n=== "+conf.header)
 	for _, tc := range testCases {
-		fmt.Fprintf(out, "=== %s: %s %s (%s)\n",
+		fmt.Fprintf(out, "=== %s: %s %s%s (%s)\n",
 			conf.prefix,
 			RelativePackagePath(tc.Package),
 			tc.Test,
+			formatRunID(tc.RunID),
 			FormatDurationAsSeconds(tc.Elapsed, 2))
-		for _, line := range execution.OutputLines(tc.Package, tc.Test) {
-			if isRunLine(line) || conf.filter(line) {
+		for _, line := range execution.OutputLines(tc) {
+			if isFramingLine(line) || conf.filter(tc.Test, line) {
 				continue
 			}
 			fmt.Fprint(out, line)
@@ -183,7 +190,7 @@ func writeTestCaseSummary(out io.Writer, execution executionSummary, conf testCa
 type testCaseFormatConfig struct {
 	header string
 	prefix string
-	filter func(string) bool
+	filter func(testName string, line string) bool
 	getter func(executionSummary) []TestCase
 }
 
@@ -192,8 +199,8 @@ func formatFailed() testCaseFormatConfig {
 	return testCaseFormatConfig{
 		header: withColor("Failed"),
 		prefix: withColor("FAIL"),
-		filter: func(line string) bool {
-			return strings.HasPrefix(line, "--- FAIL: Test")
+		filter: func(testName string, line string) bool {
+			return strings.HasPrefix(line, "--- FAIL: "+testName+" ")
 		},
 		getter: func(execution executionSummary) []TestCase {
 			return execution.Failed()
@@ -206,8 +213,8 @@ func formatSkipped() testCaseFormatConfig {
 	return testCaseFormatConfig{
 		header: withColor("Skipped"),
 		prefix: withColor("SKIP"),
-		filter: func(line string) bool {
-			return strings.HasPrefix(line, "--- SKIP: Test")
+		filter: func(testName string, line string) bool {
+			return strings.HasPrefix(line, "--- SKIP: "+testName+" ")
 		},
 		getter: func(execution executionSummary) []TestCase {
 			return execution.Skipped()
@@ -215,6 +222,8 @@ func formatSkipped() testCaseFormatConfig {
 	}
 }
 
-func isRunLine(line string) bool {
-	return strings.HasPrefix(line, "=== RUN   Test")
+func isFramingLine(line string) bool {
+	return strings.HasPrefix(line, "=== RUN   Test") ||
+		strings.HasPrefix(line, "=== PAUSE Test") ||
+		strings.HasPrefix(line, "=== CONT  Test")
 }

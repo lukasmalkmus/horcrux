@@ -124,7 +124,7 @@ var createCmd = &cobra.Command{
 			owner := questions[k].Owner
 			owner = strings.ToLower(owner)
 			owner = strings.ReplaceAll(owner, " ", "_")
-			filename := fmt.Sprintf("%s.horcrux", owner)
+			filename := fmt.Sprintf("%s.crux", owner)
 			if err := writeFragmentToDisk(filename, fragment); err != nil {
 				return err
 			}

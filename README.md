@@ -86,7 +86,7 @@ In all cases the installation can be validated by running `horcrux -v` in the
 terminal:
 
 ```shell
-Horcrux version 1.0.0
+horcrux version 1.0.0
 ```
 
 ## Usage

@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-// ShareOverhead is the byte size overhead of each share when using Split on
-// a secret. This is caused by appending a one byte tag to the share.
+// ShareOverhead is the byte size overhead of each share when using Split on a
+// secret. This is caused by appending a one byte tag to the share.
 const ShareOverhead = 1
 
-// Split takes an arbitrarily long secret and generates a `parts` number of
-// shares, `threshold` of which are required to reconstruct the secret. The
+// Split takes an arbitrarily long secret and generates a 'parts' number of
+// shares, 'threshold' of which are required to reconstruct the secret. The
 // parts and threshold must be at least 2, and less than 256. The returned
 // shares are each one byte longer than the secret as they attach a tag used to
 // reconstruct the secret.
@@ -58,7 +58,7 @@ func Split(secret []byte, parts, threshold int) ([][]byte, error) {
 			return nil, fmt.Errorf("failed to generate polynomial: %w", err)
 		}
 
-		// Generate a `parts` number of (x,y) pairs. We cheat by encoding the x
+		// Generate a 'parts' number of (x,y) pairs. We cheat by encoding the x
 		// value once as the final index, so that it only needs to be stored
 		// once.
 		for i := 0; i < parts; i++ {
@@ -73,7 +73,7 @@ func Split(secret []byte, parts, threshold int) ([][]byte, error) {
 }
 
 // Combine is used to reverse a Split and reconstruct a secret once a
-// `threshold` number of parts are available.
+// 'threshold' number of parts are available.
 func Combine(parts [][]byte) ([]byte, error) {
 	// Verify enough parts provided.
 	if len(parts) < 2 {
@@ -192,62 +192,36 @@ func interpolatePolynomial(xSamples, ySamples []uint8, x uint8) uint8 {
 // div divides two numbers in GF(2^8).
 func div(a, b uint8) uint8 {
 	if b == 0 {
-		// leaks some timing information but we don't care anyways as this
+		// Leaks some timing information but we don't care anyways as this
 		// should never happen, hence the panic.
 		panic("divide by zero")
 	}
 
-	var goodVal, zero uint8
 	logA := logTable[a]
 	logB := logTable[b]
-	diff := (int(logA) - int(logB)) % 255
-	if diff < 0 {
-		diff += 255
-	}
+	diff := ((int(logA) - int(logB)) + 255) % 255
 
-	ret := expTable[diff]
+	ret := int(expTable[diff])
 
 	// Ensure we return zero if a is zero but aren't subject to timing attacks.
-	goodVal = ret
-
-	if subtle.ConstantTimeByteEq(a, 0) == 1 {
-		ret = zero
-	} else {
-		ret = goodVal
-	}
-
-	return ret
+	ret = subtle.ConstantTimeSelect(subtle.ConstantTimeByteEq(a, 0), 0, ret)
+	return uint8(ret)
 }
 
 // mult multiplies two numbers in GF(2^8).
 func mult(a, b uint8) (out uint8) {
-	var goodVal, zero uint8
 	logA := logTable[a]
 	logB := logTable[b]
 	sum := (int(logA) + int(logB)) % 255
 
-	ret := expTable[sum]
+	ret := int(expTable[sum])
 
 	// Ensure we return zero if either a or b are zero but aren't subject to
 	// timing attacks.
-	goodVal = ret
+	ret = subtle.ConstantTimeSelect(subtle.ConstantTimeByteEq(a, 0), 0, ret)
+	ret = subtle.ConstantTimeSelect(subtle.ConstantTimeByteEq(b, 0), 0, ret)
 
-	if subtle.ConstantTimeByteEq(a, 0) == 1 {
-		ret = zero
-	} else {
-		ret = goodVal
-	}
-
-	if subtle.ConstantTimeByteEq(b, 0) == 1 {
-		ret = zero
-	} else {
-		// This operation does not do anything logically useful. It only ensures
-		// a constant number of assignments to thwart timing attacks.
-		//nolint:staticcheck,ineffassign
-		goodVal = zero
-	}
-
-	return ret
+	return uint8(ret)
 }
 
 // add combines two numbers in GF(2^8). This can also be used for subtraction

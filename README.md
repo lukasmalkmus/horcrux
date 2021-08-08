@@ -8,7 +8,6 @@
 [![Go Reference][gopkg_badge]][gopkg]
 [![Latest Release][release_badge]][release]
 [![License][license_badge]][license]
-[![License Status][license_status_badge]][license_status]
 
 ---
 
@@ -147,7 +146,7 @@ Distributed under MIT License (`The MIT License`).
 
 See [LICENSE](LICENSE) for more information.
 
-[![License Status Large][license_status_large_badge]][license_status_large]
+[![License Status][license_status_badge]][license_status]
 
 <!-- Badges -->
 

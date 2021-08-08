@@ -5,7 +5,7 @@
 [![Go Workflow][go_workflow_badge]][go_workflow]
 [![Coverage Status][coverage_badge]][coverage]
 [![Go Report][report_badge]][report]
-[![GoDoc][docs_badge]][docs]
+[![Go Reference][gopkg_badge]][gopkg]
 [![Latest Release][release_badge]][release]
 [![License][license_badge]][license]
 [![License Status][license_status_badge]][license_status]
@@ -151,6 +151,8 @@ See [LICENSE](LICENSE) for more information.
 
 <!-- Badges -->
 
+[gopkg]: https://pkg.go.dev/github.com/lukasmalkmus/horcrux
+[gopkg_badge]: https://img.shields.io/badge/doc-reference-007d9c?logo=go&logoColor=white&style=flat-square
 [go_workflow]: https://github.com/lukasmalkmus/horcrux/actions/workflows/push.yml
 [go_workflow_badge]: https://img.shields.io/github/workflow/status/lukasmalkmus/horcrux/Push?style=flat-square&ghcache=unused
 [coverage]: https://codecov.io/gh/lukasmalkmus/horcrux
@@ -162,6 +164,6 @@ See [LICENSE](LICENSE) for more information.
 [license]: https://opensource.org/licenses/MIT
 [license_badge]: https://img.shields.io/github/license/lukasmalkmus/horcrux.svg?color=blue&style=flat-square&ghcache=unused
 [license_status]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_shield
-[license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg
-[license_status_large]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_large
-[license_status_large_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg?type=large
+[license_badge]: https://img.shields.io/github/license/lukasmalkmus/horcrux.svg?color=blue&style=flat-square&ghcache=unused
+[license_status]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux
+[license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg?type=large&ghcache=unused

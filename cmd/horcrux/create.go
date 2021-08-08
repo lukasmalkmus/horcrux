@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/lukasmalkmus/horcrux/pkg/horcrux"
+	"github.com/lukasmalkmus/horcrux/horcrux"
 )
 
 var questions []horcrux.Question
@@ -45,7 +45,8 @@ var createCmd = &cobra.Command{
 		prompt = promptui.Prompt{
 			Label: "Amount of horcruxes needed to restore the content",
 			Validate: func(input string) error {
-				if v, err := strconv.Atoi(input); err != nil {
+				var v int
+				if v, err = strconv.Atoi(input); err != nil {
 					return errors.New("invalid number")
 				} else if v < 2 || v > 255 {
 					return errors.New("must be a number between 2 and 255")
@@ -63,14 +64,14 @@ var createCmd = &cobra.Command{
 		viper.Set("threshold", threshold)
 
 		questions = make([]horcrux.Question, lenHorcruxes)
-		for k := range questions {
-			cmd.Printf("Creating horcrux %d of %d. Please enter some information to protect your horcrux:\n", k+1, lenHorcruxes)
+		for i := range questions {
+			cmd.Printf("Creating horcrux %d of %d. Please enter some information to protect your horcrux:\n", i+1, lenHorcruxes)
 
 			prompt = promptui.Prompt{
 				Label:   "Your name",
 				Default: defaultUsername(),
 				Validate: func(input string) error {
-					if err := validateString(input); err != nil {
+					if err = validateString(input); err != nil {
 						return err
 					} else if hasOwner(questions, input) {
 						return fmt.Errorf("%q is already taken", input)
@@ -78,7 +79,7 @@ var createCmd = &cobra.Command{
 					return nil
 				},
 			}
-			if questions[k].Owner, err = prompt.Run(); err != nil {
+			if questions[i].Owner, err = prompt.Run(); err != nil {
 				return handlePromptError(err)
 			}
 
@@ -86,7 +87,7 @@ var createCmd = &cobra.Command{
 				Label:    "Your security question",
 				Validate: validateString,
 			}
-			if questions[k].Question, err = prompt.Run(); err != nil {
+			if questions[i].Text, err = prompt.Run(); err != nil {
 				return handlePromptError(err)
 			}
 
@@ -94,7 +95,7 @@ var createCmd = &cobra.Command{
 				Label:    "Answer to the security question",
 				Validate: validateString,
 			}
-			if questions[k].Answer, err = prompt.Run(); err != nil {
+			if questions[i].Answer, err = prompt.Run(); err != nil {
 				return handlePromptError(err)
 			}
 		}

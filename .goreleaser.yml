@@ -1,0 +1,160 @@
+project_name: horcrux
+
+builds:
+  - <<: &build_defaults
+      binary: horcrux
+      main: ./cmd/horcrux
+      env:
+        - CGO_ENABLED=0
+      tags:
+        - osusergo
+        - netgo
+        - static_build
+      flags:
+        - -buildmode=pie
+        - -installsuffix=cgo
+        - -trimpath
+      ldflags:
+        - -s -w -extldflags "-fno-PIC -static -Wl -z now -z relro"
+        - -X github.com/axiomhq/pkg/version.release={{ .Version }}
+        - -X github.com/axiomhq/pkg/version.revision={{ .ShortCommit }}
+        - -X github.com/axiomhq/pkg/version.buildDate={{ .CommitDate }}
+        - -X github.com/axiomhq/pkg/version.buildUser=goreleaser
+      mod_timestamp: "{{ .CommitTimestamp }}"
+    id: darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+  - <<: *build_defaults
+    id: linux
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    
+  - <<: *build_defaults
+    flags:
+      - -buildmode=exe
+      - -installsuffix=cgo
+      - -trimpath
+    id: linux-no-pie
+    goos:
+      - linux
+    goarch:
+      - arm
+      - 386
+    goarm:
+      - 6
+      - 7
+
+  - <<: *build_defaults
+    flags:
+      - -buildmode=exe
+      - -installsuffix=cgo
+      - -trimpath
+    id: docker
+    goos:
+      - linux
+    goarch:
+      - amd64
+
+  - <<: *build_defaults
+    id: windows
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - 386
+
+archives:
+  - <<: &archive_defaults
+      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    id: nix
+    builds:
+      - darwin
+      - linux
+      - linux-no-pie
+    wrap_in_directory: true
+    format: tar.gz
+    files:
+      - LICENSE
+      - README.md
+      - man/{{ .ProjectName }}*.1
+  - <<: *archive_defaults
+    id: windows
+    builds:
+      - windows
+    wrap_in_directory: false
+    format: zip
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+milestones:
+  - repo:
+      owner: lukasmalkmus
+      name: horcrux
+    close: true
+    fail_on_error: false
+
+release:
+  github:
+    owner: lukasmalkmus
+    name: horcrux
+  prerelease: auto
+  name_template: Horcrux v{{ .Version }}
+
+brews:
+  - name: horcrux
+    description: Security question based secret sharing utility
+    homepage: https://github.com/lukasmalkmus/horcrux
+    license: MIT
+    tap:
+      owner: lukasmalkmus
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TOKEN }}"
+    skip_upload: auto
+    folder: Formula
+    install: |
+      bin.install "{{ .ProjectName }}"
+    test: |
+      assert_match "Horcrux version #{version}", shell_output("#{bin}/{{ .ProjectName }} -v")
+
+dockers:
+  - ids:
+      - docker
+    image_templates:
+      - "ghcr.io/lukasmalkmus/horcrux:{{ .Major }}"
+      - "ghcr.io/lukasmalkmus/horcrux:{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/lukasmalkmus/horcrux:{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "ghcr.io/lukasmalkmus/horcrux:latest"
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/lukasmalkmus/horcrux
+      - --label=org.opencontainers.image.source=https://github.com/lukasmalkmus/horcrux
+      - --label=org.opencontainers.image.documentation=https://github.com/lukasmalkmus/horcrux
+      - --label=org.opencontainers.image.licenses=MIT
+      - --label=org.opencontainers.image.author=Lukas Malkmus <mail@lukasmalkmus.com>
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.vendor=Lukas Malkmus

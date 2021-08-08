@@ -1,8 +1,8 @@
 # lukasmalkmus/horcrux
 
-> A security question based secret sharing utility. - by **[Lukas Malkmus]**
+> A security question based secret sharing utility.
 
-[![Build Status][build_badge]][build]
+[![Go Workflow][go_workflow_badge]][go_workflow]
 [![Coverage Status][coverage_badge]][coverage]
 [![Go Report][report_badge]][report]
 [![GoDoc][docs_badge]][docs]
@@ -22,53 +22,83 @@
 ## Introduction
 
 _horcrux_ is a security question based secret sharing utility. The idea and
-package code is inspired and mostly taken from the abandoned [horcrux] package
-by [Coda Hale].
+package code is inspired and mostly taken from the abandoned [horcrux][1]
+package by [Coda Hale][2].
 
 _horcrux_ splits a secret into multiple fragments and associates every fragment
 with a security question. The answer to that question is used to encrypt the
 fragment using ChaCha20Poly1305. Only a given number of fragments is needed to
 fully restore the original secret.
 
-## Usage
+  [1]: https://github.com/codahale/horcrux
+  [2]: https://github.com/codahale
 
-### Installation
+## Installation
 
-The easiest way to run _horcrux_ is by grabbing the latest standalone binary
-from the [release page][release].
+### Download and install the pre-compiled binary manually
 
-This project uses native [go mod] support for vendoring and requires a working
-`go` toolchain installation when installing via `go get` or from source.
+Binary releases are available on [GitHub Releases][3].
 
-#### Install using `go get`
+  [3]: https://github.com/lukasmalkmus/horcrux/releases/latest
 
-```bash
-GO111MODULE=on go install github.com/lukasmalkmus/horcrux/cmd/horcrux
+### Install using [Homebrew][4]
+
+```shell
+brew tap lukasmalkmus/tap
+brew install horcrux
 ```
 
-#### Install from source
+  [4]: https://brew.sh
 
-```bash
+To update:
+
+```shell
+brew upgrade horcrux
+```
+
+### Install using `go get`
+
+```shell
+go get -u github.com/lukasmalkmus/horcrux/cmd/horcrux
+```
+
+### Install from source
+
+```shell
 git clone https://github.com/lukasmalkmus/horcrux.git
 cd horcrux
-make # Run a full build including code formatting, linting and testing
-make build # Build production binary
 make install # Build and install binary into $GOPATH
 ```
 
-#### Validate installation
+### Run the Docker image
 
-The installation can be validated by running `horcrux version` in the terminal.
+Docker images are available on the [GitHub Package Registry][5].
 
-### Using the application
+```shell
+docker pull ghcr.io/lukasmalkmus/horcrux
+docker run ghcr.io/lukasmalkmus/horcrux
+```
 
-```bash
+  [5]: https://github.com/lukasmalkmus/horcrux/packages
+
+### Validate installation
+
+In all cases the installation can be validated by running `horcrux -v` in the
+terminal:
+
+```shell
+Horcrux version 1.0.0
+```
+
+## Usage
+
+```shell
 horcrux [flags] [commands]
 ```
 
 Help on flags and commands:
 
-```bash
+```shell
 horcrux --help
 ```
 
@@ -98,20 +128,20 @@ Split128MB-8    134M ± 0%
 Split1GB-8     1.07G ± 0%
 ```
 
-Splitting a 1 GB file takes up to 3 minutes. Also the memory consumption is a
-lot higher than the size of the file which is being processed. An `io.Reader`
+Splitting a 1GB file takes up to 3 minutes. Also the memory consumption is a lot
+higher than the size of the file which is being processed. An `io.Reader`
 based implementation is needed to fix this but this requires multiple tweaks,
 especially to Shamir's Secret Sharing implementation.
 
-Splitting
-
 ## Contributing
 
-Feel free to submit PRs or to fill Issues. Every kind of help is appreciated.
+Feel free to submit PRs or to fill issues. Every kind of help is appreciated. 
+
+Before committing, `make` should run without any issues.
 
 ## License
 
-© Lukas Malkmus, 2020
+&copy; Lukas Malkmus, 2021
 
 Distributed under MIT License (`The MIT License`).
 
@@ -119,27 +149,18 @@ See [LICENSE](LICENSE) for more information.
 
 [![License Status Large][license_status_large_badge]][license_status_large]
 
-<!-- Links -->
-
-[lukas malkmus]: https://github.com/lukasmalkmus
-[coda hale]: https://github.com/codahale
-[horcrux]: https://github.com/codahale/horcrux
-[go mod]: https://golang.org/cmd/go/#hdr-Module_maintenance
-
 <!-- Badges -->
 
-[build]: https://travis-ci.com/lukasmalkmus/horcrux
-[build_badge]: https://img.shields.io/travis/com/lukasmalkmus/horcrux.svg?style=flat-square
+[go_workflow]: https://github.com/lukasmalkmus/horcrux/actions/workflows/push.yml
+[go_workflow_badge]: https://img.shields.io/github/workflow/status/lukasmalkmus/horcrux/Push?style=flat-square&ghcache=unused
 [coverage]: https://codecov.io/gh/lukasmalkmus/horcrux
-[coverage_badge]: https://img.shields.io/codecov/c/github/lukasmalkmus/horcrux.svg?style=flat-square
+[coverage_badge]: https://img.shields.io/codecov/c/github/lukasmalkmus/horcrux.svg?style=flat-square&ghcache=unused
 [report]: https://goreportcard.com/report/github.com/lukasmalkmus/horcrux
-[report_badge]: https://goreportcard.com/badge/github.com/lukasmalkmus/horcrux?style=flat-square
-[docs]: https://godoc.org/github.com/lukasmalkmus/horcrux
-[docs_badge]: https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square
-[release]: https://github.com/lukasmalkmus/horcrux/releases
-[release_badge]: https://img.shields.io/github/release/lukasmalkmus/horcrux.svg?style=flat-square
+[report_badge]: https://goreportcard.com/badge/github.com/lukasmalkmus/horcrux?style=flat-square&ghcache=unused
+[release]: https://github.com/lukasmalkmus/horcrux/releases/latest
+[release_badge]: https://img.shields.io/github/release/lukasmalkmus/horcrux.svg?style=flat-square&ghcache=unused
 [license]: https://opensource.org/licenses/MIT
-[license_badge]: https://img.shields.io/github/license/lukasmalkmus/horcrux.svg?color=blue&style=flat-square
+[license_badge]: https://img.shields.io/github/license/lukasmalkmus/horcrux.svg?color=blue&style=flat-square&ghcache=unused
 [license_status]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_shield
 [license_status_badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux.svg
 [license_status_large]: https://app.fossa.com/projects/git%2Bgithub.com%2Flukasmalkmus%2Fhorcrux?ref=badge_large

@@ -7,7 +7,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
-	"github.com/lukasmalkmus/horcrux/pkg/horcrux"
+	"github.com/lukasmalkmus/horcrux/horcrux"
 )
 
 var outputFile string
@@ -20,12 +20,12 @@ var restoreCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var splitID string
 		answers := make([]horcrux.Answer, len(args))
-		for k, arg := range args {
+		for i, arg := range args {
 			fragment, err := getFragementFromDisk(arg)
 			if err != nil {
 				return err
 			}
-			answers[k] = horcrux.Answer{Fragment: fragment}
+			answers[i] = horcrux.Answer{Fragment: fragment}
 
 			if splitID == "" {
 				splitID = fragment.ID
@@ -34,7 +34,7 @@ var restoreCmd = &cobra.Command{
 			}
 		}
 
-		for k, answer := range answers {
+		for i, answer := range answers {
 			prompt := promptui.Prompt{
 				Label:    fmt.Sprintf("(%s) %s", answer.Owner, answer.Question),
 				Validate: validateString,
@@ -43,7 +43,7 @@ var restoreCmd = &cobra.Command{
 			if err != nil {
 				return handlePromptError(err)
 			}
-			answers[k].Answer = res
+			answers[i].Answer = res
 		}
 
 		res, err := horcrux.Recover(answers)

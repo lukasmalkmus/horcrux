@@ -1,9 +1,9 @@
 // +build tools
 
-package tools
+package horcrux
 
 import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "golang.org/x/perf/cmd/benchstat"
+	_ "github.com/goreleaser/goreleaser"
 	_ "gotest.tools/gotestsum"
 )

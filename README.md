@@ -71,14 +71,14 @@ make install # Build and install binary into $GOPATH
 
 ### Run the Docker image
 
-Docker images are available on the [GitHub Package Registry][5].
+Docker images are available on the [GitHub Container Registry][5].
 
 ```shell
 docker pull ghcr.io/lukasmalkmus/horcrux
 docker run ghcr.io/lukasmalkmus/horcrux
 ```
 
-  [5]: https://github.com/lukasmalkmus/horcrux/packages
+  [5]: https://github.com/lukasmalkmus/horcrux/pkgs/container/horcrux
 
 ### Validate installation
 

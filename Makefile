@@ -117,9 +117,9 @@ $(COVERPROFILE):
 
 # INSTALL TARGETS
 
-$(GOPATH)/bin/horcrux: dep.stamp $(call go-pkg-sourcefiles, ./...)
+$(GOPATH)/bin/horcrux: dep.stamp $(call go-pkg-sourcefiles, ./cmd/horcrux)
 	@echo ">> installing horcrux binary"
-	@$(GO_BIN_IN_PATH) install $(GOFLAGS) ./cmd/horcrux
+	@$(GO_BIN_IN_PATH) install $(GO_FLAGS) ./cmd/horcrux
 
 # TOOLS
 

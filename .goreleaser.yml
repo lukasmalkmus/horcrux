@@ -135,7 +135,7 @@ brews:
     install: |
       bin.install "{{ .ProjectName }}"
     test: |
-      assert_match "Horcrux version #{version}", shell_output("#{bin}/{{ .ProjectName }} -v")
+      assert_match "horcrux version #{version}", shell_output("#{bin}/{{ .ProjectName }} -v")
 
 dockers:
   - ids:

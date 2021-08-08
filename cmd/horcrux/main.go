@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/axiomhq/pkg/version"
 	"github.com/golang/snappy"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -26,6 +27,9 @@ utility. Yes, the name is inspired by Harry Potter.
 
 func main() {
 	rootCmd.SilenceUsage = true
+	rootCmd.Flags().BoolP("version", "v", false, "Show horcrux version")
+	rootCmd.SetVersionTemplate("{{ .Use }} version {{ .Version }}\n")
+	rootCmd.Version = version.Release()
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
